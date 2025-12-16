@@ -59,6 +59,8 @@ const u8* ToHex(u8 a)
 
 struct FS_FILE
 {
+	inline void operator << (u8 c) { _Data.push_back(c); }
+
 	string _sName;
 	vector<u8> _Data;
 };
@@ -80,10 +82,12 @@ void FS_PACK::AddFile(string sFile)
 	if (f)
 	{
 		FS_FILE* pFsFile = new FS_FILE;
+		FS_FILE& file =*pFsFile;
 
 		char szBuffer[MAX_LENGTH];
 		while (!feof(f))
 		{
+			szBuffer[0]='\0';
 			fgets(szBuffer, MAX_LENGTH, f);
 			if (ferror(f))
 			{
@@ -96,12 +100,36 @@ void FS_PACK::AddFile(string sFile)
 			{
 				if (sSplit[0]=="line")
 				{
-					pFsFile->_Data.push_back('l');
-					pFsFile->_Data.push_back((u8)std::stoi(sSplit[1]));
-					pFsFile->_Data.push_back((u8)std::stoi(sSplit[2]));
-					pFsFile->_Data.push_back((u8)std::stoi(sSplit[3]));
-					pFsFile->_Data.push_back((u8)std::stoi(sSplit[4]));
-					pFsFile->_Data.push_back((u8)std::stoi(sSplit[5]));
+					file << 'l';
+					file << std::stoi(sSplit[1]);
+					file << std::stoi(sSplit[2]);
+					file << std::stoi(sSplit[3]);
+					file << std::stoi(sSplit[4]);
+					file << std::stoi(sSplit[5]);
+				}
+				else if (sSplit[0]=="ellipse")
+				{
+					file << 'e';
+					file << std::stoi(sSplit[1]);
+					file << std::stoi(sSplit[2]);
+					file << std::stoi(sSplit[3]);
+					file << std::stoi(sSplit[4]);
+					file << std::stoi(sSplit[5]);
+				}
+				else if (sSplit[0]=="circle")
+				{
+					file << 'c';
+					file << std::stoi(sSplit[1]);
+					file << std::stoi(sSplit[2]);
+					file << std::stoi(sSplit[3]);
+					file << std::stoi(sSplit[4]);
+				}
+				else if (sSplit[0]=="fill")
+				{
+					file << 'f';
+					file << std::stoi(sSplit[1]);
+					file << std::stoi(sSplit[2]);
+					file << std::stoi(sSplit[3]);
 				}
 
 			}
@@ -195,7 +223,7 @@ int main()
 	FS_PACK pack;
 	pack.AddFile("abc.txt");
 	pack.AddFile("test.txt");
-	pack.AddFile("scene.txt");
+//	pack.AddFile("scene.txt");
 
 	pack.Out("out.lua");
 }
