@@ -10,7 +10,6 @@ if arg[2] == "debug" then
 	print "----------"
 end
 
-print("Welcome")
 
 function Split(inputstr, sep)
 	if sep == nil then
@@ -50,7 +49,7 @@ local Packer={
 			while(true) do
 				local line=f:read()
 				if line==nil then break end
-
+				
 				local s=Split(line)
 
 				local c=Convert[s[1]]
@@ -70,7 +69,7 @@ local Packer={
 			local file = {name=fileName, data=ByteStream}
 			table.insert(self._Files, file)
 		end
-
+		
 	end
 	,Output=function(self, fileName)
 
@@ -87,8 +86,9 @@ local Packer={
 				add(ByteStream, string.byte(c))
 			end
 			add(ByteStream, 0)
-
+			
 			filesize16 = #f.data
+			print(string.format("+ %s %d bytes", str, filesize16))
 			add(ByteStream, filesize16&0xFF);
 			add(ByteStream, filesize16>>8);
 		end
@@ -99,7 +99,8 @@ local Packer={
 			end
 		end
 
---		local RawStream = table.concat(ByteStream)
+		--		local RawStream = table.concat(ByteStream)
+		print(string.format("--------------------\nTotal %d bytes", #ByteStream))
 		
 		local f=io.open(fileName, "w")
 		if f~=nil then
@@ -132,7 +133,7 @@ local Packer={
 			end
 
 			f:write(sFooter)
-
+			
 			io.close(f)
 		end
 
@@ -143,6 +144,7 @@ local Packer={
 local InputFiles = { "abc.txt", "test.txt", "scene.txt" }
 Packer:AddFiles(InputFiles)
 
-Packer:Output("out2.lua")
+print("Writing ...")
+Packer:Output("out.lua")
 
 print("Done")
