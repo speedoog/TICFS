@@ -140,7 +140,7 @@ local Packer={
 }
 
 
-local InputFiles = { "abc.txt", "test.txt", "scene.txt" }
+local InputFiles = { "Spectrals.txt" }
 Packer:AddFiles(InputFiles)
 
 Packer:Output("out2.lua")
