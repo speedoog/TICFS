@@ -121,38 +121,51 @@ function Packer.AddFileTga(_, fileName)
 	img.image_id = Read(f, img.image_id_len)
 
 	img.pixrgb = {}
-
-	local nPix = img.width*img.height
-    for i = 1, nPix do
-		local b,g,r=Read(f,1),Read(f,1),Read(f,1)
-		table.insert(img.pixrgb,{r,g,b})
-	end
-
-	print(string.format("pixel read %dx%d : %d", img.width, img.height, nPix))
-
-	-- count colors
-	local pal = {colors = {}}
-	pal.getindex= function(_,r,g,b)
-		for k,v in pairs(_.colors) do
-			if v[1]==r and v[2]==g and v[3]==b then
-				return k
-			end
-		end
-		table.insert(_.colors,{r,g,b})
-		return #_.colors
-	end
-
 	img.pixpal={}
 
-	for k,v in pairs(img.pixrgb) do
-		local ic=pal:getindex(v[1],v[2],v[3])
-		table.insert(img.pixpal,ic)
+	local nPixCount = img.width*img.height
+	print(string.format("pixel read %dx%d : %d", img.width, img.height, nPixCount))
+
+	local pal = {}
+	for y = img.height-1,0,-1 do
+		for x = 0,img.width-1 do
+			local ipix = y*img.width+x
+			local b,g,r=Read(f,1),Read(f,1),Read(f,1)
+			img.pixrgb[ipix] = {r,g,b}
+
+			-- find color idx
+			local ic=0
+			for k,v in pairs(pal) do
+				if v[1]==r and v[2]==g and v[3]==b then
+					ic=k
+					break
+				end
+			end
+			if ic==0 then
+				table.insert(pal,{r,g,b})
+				ic =#pal
+			end
+
+			-- store paletted image
+			img.pixpal[ipix+1] = ic-1
+		end
 	end
 
-	print(string.format("Color count %d", #pal.colors))
+	print(string.format("Color count %d", #pal))
 
 	local ByteStream = {}
-	for i=1,nPix,8 do
+	-- write palette
+	PushToStream(ByteStream,#pal)			-- num colors
+	for k,v in pairs(pal) do
+		PushToStream(ByteStream,v[1])		-- r g b
+		PushToStream(ByteStream,v[2])
+		PushToStream(ByteStream,v[3])
+	end
+
+	-- write img
+	PushToStream(ByteStream,img.width)		-- width
+	PushToStream(ByteStream,img.height)		-- height
+	for i=1,nPixCount,8 do
 		local a=0
 		for k=0,7 do
 			a=(a<<5)|img.pixpal[i+k]
