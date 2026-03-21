@@ -38,10 +38,13 @@ end
 function Packer.AddFile(_, fileName)
 
 	local splitFile=Split(fileName, ".")
-	if (splitFile[2]=="txt") then
-		_:AddFileTxt(fileName)
-	elseif (splitFile[2]=="tga") then
-		_:AddFileTga(fileName)
+	local name = splitFile[1]
+	local ext = splitFile[2]
+
+	if (ext=="txt") then
+		_:AddFileTxt(name,ext)
+	elseif (ext=="tga") then
+		_:AddFileTga(name,ext)
 	else
 		print(string.format("%s : Unsupported file extension %s", fileName, splitFile[2]))
 	end
@@ -57,10 +60,15 @@ function Packer.AddByteStream(_,fileName,ByteStream)
 		table.insert(ByteStream,0)
 		local file = {name = fileName,data = ByteStream}
 		table.insert(_._Files,file)
+
+		local str = string.char(unpack(ByteStream))
+		local binfile = io.open(fileName,"wb")
+		binfile:write(str)
+		binfile:close()
 	end
 end
 
-function Packer.AddFileTxt(_, fileName)
+function Packer.AddFileTxt(_,name,ext)
 	local valid =
 	{
 		["l"] = true,
@@ -71,7 +79,7 @@ function Packer.AddFileTxt(_, fileName)
 	}
 
 	local ByteStream = {}
-	local f=io.open(fileName, "r")
+	local f=io.open(name.."."..ext, "r")
 	if f~=nil then
 		while(true) do
 			local line=f:read()
@@ -92,15 +100,15 @@ function Packer.AddFileTxt(_, fileName)
 		io.close(f)
 	end
 
-	_:AddByteStream(fileName, ByteStream)
+	_:AddByteStream(name..".draw", ByteStream)
 end
 
 function Read(f,i)
 	return string.byte(f:read(i))
 end
 
-function Packer.AddFileTga(_, fileName)
-	local f = io.open(fileName,"rb")
+function Packer.AddFileTga(_,name,ext)
+	local f = io.open(name.."."..ext,"rb")
 	if f==nil then return end
 
 	local img = {}
@@ -183,9 +191,84 @@ function Packer.AddFileTga(_, fileName)
 		PushToStream(ByteStream, a5)
 	end
 
-	_:AddByteStream(fileName,ByteStream)
+	_:AddByteStream(name..".c31",ByteStream)
 end
 
+function Packer.OutputZip(_, fileName)
+
+	local Zipfile = "out.zip"
+
+	local cmd7z="7za.exe a -mx9 -y "..Zipfile
+	for k,f in pairs(_._Files) do
+		cmd7z=cmd7z.." "..f.name
+	end
+
+	-- compress to zip
+	-- 7za.exe a -mx9 test.zip Levex.draw Spectrals.draw test.c31
+	local handle = io.popen(cmd7z)
+	handle:close()
+
+	-- Read Zip infos & print
+	handle = io.popen("7za.exe l "..Zipfile)
+	local result = handle:read("*a")
+	handle:close()
+	print(result)
+
+	-- Zip written, read to ByteStream
+	local add = function(s,c)
+		table.insert(s,string.format("%02x",c))
+	end
+
+	local fZip = io.open(Zipfile, "rb")
+	local fOut = io.open(fileName,"w")
+	if fOut==nil or fZip==nil then return end
+
+	local ZipData = fZip:read("*a")
+	fZip:close()
+
+	local ZipSize=#ZipData
+	local ByteStream = { }
+	add(ByteStream,ZipSize>>8)
+	add(ByteStream,ZipSize&0xFF)
+	for i=1,#ZipData do
+		local c = string.byte(ZipData:sub(i,i))
+		add(ByteStream,c)
+	end
+
+	-- now build map lua file
+	local sHeader = "-- <MAP>";
+	local sFooter = "\n-- </MAP>\n";
+
+	fOut:write(sHeader)
+
+	local iCurrentRow = -1
+	local i = 0;
+	while i < #ByteStream do
+		if i%240 == 0 then
+			iCurrentRow = iCurrentRow+1
+			-- "-- 001:"
+			local sRow = string.format("\n-- %03d:",iCurrentRow);
+			fOut:write(sRow);
+		end
+		local str = ByteStream[i+1]
+		local hi = str:sub(1,1)
+		local lo = str:sub(2,2)
+		fOut:write(lo);
+		fOut:write(hi);
+		i = i+1
+	end
+
+	-- trailing zeros
+	while i%240 ~= 0 do
+		fOut:write("00");
+		i = i+1;
+	end
+
+	fOut:write(sFooter)
+
+	io.close(fOut)
+
+end
 
 function Packer.Output(_, fileName)
 
@@ -259,6 +342,8 @@ local InputFiles = {"Spectrals.txt","Levex.txt", "test.tga" }
 Packer:AddFiles(InputFiles)
 
 print("Writing ...")
-Packer:Output("out.lua")
+--Packer:Output("out.lua")
+Packer:OutputZip("out.lua")
 
 print("Done")
+
