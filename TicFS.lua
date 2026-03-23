@@ -62,9 +62,9 @@ function Packer.AddByteStream(_,fileName,ByteStream)
 		table.insert(_._Files,file)
 
 		local str = string.char(unpack(ByteStream))
-		local binfile = io.open(fileName,"wb")
-		binfile:write(str)
-		binfile:close()
+		local fileBin = io.open(fileName,"wb")
+		fileBin:write(str)
+		fileBin:close()
 	end
 end
 
@@ -338,7 +338,7 @@ function Packer.Output(_, fileName)
 end
 
 
-local InputFiles = {"Spectrals.txt","Levex.txt", "test.tga" }
+local InputFiles = {"Spectrals.txt","Levex.txt","Tibet.txt", "test.tga" }
 Packer:AddFiles(InputFiles)
 
 print("Writing ...")
