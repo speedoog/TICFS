@@ -338,7 +338,7 @@ function Packer.Output(_, fileName)
 end
 
 
-local InputFiles = {"Spectrals.txt","Levex.txt","Tibet.txt", "test.tga" }
+local InputFiles = {"Spectrals.txt","Levex.txt","Tibet.txt", "Dear.txt", "test.tga" }
 Packer:AddFiles(InputFiles)
 
 print("Writing ...")
