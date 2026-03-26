@@ -134,7 +134,7 @@ function Packer.AddFileTga(_,name,ext)
 	local nPixCount = img.width*img.height
 	print(string.format("pixel read %dx%d : %d", img.width, img.height, nPixCount))
 
-	local pal = {}
+	local pal = {{0,0,0}}
 	for y = img.height-1,0,-1 do
 		for x = 0,img.width-1 do
 			local ipix = y*img.width+x
@@ -338,7 +338,7 @@ function Packer.Output(_, fileName)
 end
 
 
-local InputFiles = {"Spectrals.txt","Levex.txt","Tibet.txt", "Dear.txt", "test.tga" }
+local InputFiles = {"Spectrals.txt","Levex.txt","Tibet.txt", "Dear.txt", "Made.tga" }
 Packer:AddFiles(InputFiles)
 
 print("Writing ...")
