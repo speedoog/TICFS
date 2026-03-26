@@ -173,22 +173,24 @@ function Packer.AddFileTga(_,name,ext)
 	-- write img
 	PushToStream(ByteStream,img.width)		-- width
 	PushToStream(ByteStream,img.height)		-- height
-	for i=1,nPixCount,8 do
-		local a=0
-		for k=0,7 do
-			a=(a<<5)|img.pixpal[i+k]
-		end
+	for i=1,nPixCount do
+		local a = img.pixpal[i]
+		PushToStream(ByteStream,a)
 
-		local a5 = a&0xFF	a = a>>8
-		local a4 = a&0xFF	a = a>>8
-		local a3 = a&0xFF	a = a>>8
-		local a2 = a&0xFF	a = a>>8
-		local a1 = a&0xFF	a = a>>8
-		PushToStream(ByteStream, a1)
-		PushToStream(ByteStream, a2)
-		PushToStream(ByteStream, a3)
-		PushToStream(ByteStream, a4)
-		PushToStream(ByteStream, a5)
+		-- for k=0,7 do
+		-- 	a=(a<<5)|img.pixpal[i+k]
+		-- end
+
+		-- local a5 = a&0xFF	a = a>>8
+		-- local a4 = a&0xFF	a = a>>8
+		-- local a3 = a&0xFF	a = a>>8
+		-- local a2 = a&0xFF	a = a>>8
+		-- local a1 = a&0xFF	a = a>>8
+		-- PushToStream(ByteStream, a1)
+		-- PushToStream(ByteStream, a2)
+		-- PushToStream(ByteStream, a3)
+		-- PushToStream(ByteStream, a4)
+		-- PushToStream(ByteStream, a5)
 	end
 
 	_:AddByteStream(name..".c31",ByteStream)
@@ -197,6 +199,8 @@ end
 function Packer.OutputZip(_, fileName)
 
 	local Zipfile = "out.zip"
+	local handle = io.popen("del "..Zipfile)
+	handle:close()
 
 	local cmd7z="7za.exe a -mx9 -y "..Zipfile
 	for k,f in pairs(_._Files) do
@@ -205,7 +209,7 @@ function Packer.OutputZip(_, fileName)
 
 	-- compress to zip
 	-- 7za.exe a -mx9 test.zip Levex.draw Spectrals.draw test.c31
-	local handle = io.popen(cmd7z)
+	handle = io.popen(cmd7z)
 	handle:close()
 
 	-- Read Zip infos & print
@@ -338,7 +342,7 @@ function Packer.Output(_, fileName)
 end
 
 
-local InputFiles = {"Spectrals.txt","Levex.txt","Tibet.txt", "Dear.txt", "Made.tga" }
+local InputFiles = {"Spectrals.txt","Levex.txt","Tibet.txt","Dear.txt","MountainVista.tga"}
 Packer:AddFiles(InputFiles)
 
 print("Writing ...")
