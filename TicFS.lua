@@ -202,7 +202,7 @@ function Packer.OutputZip(_, fileName)
 	local handle = io.popen("del "..Zipfile)
 	handle:close()
 
-	local cmd7z="7za.exe a -mx9 -y "..Zipfile
+	local cmd7z="7za.exe a -y "..Zipfile
 	for k,f in pairs(_._Files) do
 		cmd7z=cmd7z.." "..f.name
 	end
@@ -342,7 +342,7 @@ function Packer.Output(_, fileName)
 end
 
 
-local InputFiles = {"Spectrals.txt","Levex.txt","Tibet.txt","Dear.txt","MountainVista.tga"}
+local InputFiles = {"Spectrals.txt","Levex.txt","Tibet.txt","Dear.txt","Rando.txt", "MountainVista.tga"}
 Packer:AddFiles(InputFiles)
 
 print("Writing ...")
