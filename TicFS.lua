@@ -346,7 +346,7 @@ end
 
 local InputFiles = {"Spectrals.txt","Levex.txt","Tibet.txt","Dear.txt","Rando.txt","Tunnel.txt",
 					"MountainVista.tga",
-					"cube.obj", "tetrahedron.obj","octahedron.obj", "pyramid.obj", "cyl.obj" }
+					"cube.obj","tetrahedron.obj","sphere.obj", "octahedron.obj","pyramid.obj","cyl.obj"}
 Packer:AddFiles(InputFiles)
 
 print("Writing ...")
