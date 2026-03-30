@@ -45,6 +45,8 @@ function Packer.AddFile(_, fileName)
 		_:AddFileTxt(name,ext)
 	elseif (ext=="tga") then
 		_:AddFileTga(name,ext)
+	elseif ext=="obj" then
+		table.insert(_._Files, {name = fileName} )
 	else
 		print(string.format("%s : Unsupported file extension %s", fileName, splitFile[2]))
 	end
@@ -342,7 +344,9 @@ function Packer.Output(_, fileName)
 end
 
 
-local InputFiles = {"Spectrals.txt","Levex.txt","Tibet.txt","Dear.txt","Rando.txt","Tunnel.txt", "MountainVista.tga"}
+local InputFiles = {"Spectrals.txt","Levex.txt","Tibet.txt","Dear.txt","Rando.txt","Tunnel.txt",
+					"MountainVista.tga",
+					"cube.obj", "tetrahedron.obj","octahedron.obj", "pyramid.obj", "cyl.obj" }
 Packer:AddFiles(InputFiles)
 
 print("Writing ...")
